@@ -5,6 +5,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,8 +63,18 @@ public class MainActivity extends Activity {
             final TypeWriterView writer = (TypeWriterView) rootView.findViewById(R.id.typeWriter);
             final Button animate = (Button) rootView.findViewById(R.id.animate);
             final EditText input = (EditText) rootView.findViewById(R.id.input);
-            writer.setTextColor(Color.GREEN);
             writer.animateText("Sample String");
+            writer.setCallback(new TypeWriterView.Callback() {
+                @Override
+                public void onAnimationEnd() {
+                    Log.d("TypeWriterView", "onAnimationEnd");
+                }
+
+                @Override
+                public void onCharacterTyped(char character) {
+                    Log.d("TypeWriterView", "onCharacterTyped: " + character + " " + writer.getEditText().getText());
+                }
+            });
             animate.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

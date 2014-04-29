@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -48,21 +49,29 @@ public class TypeWriterView extends FrameLayout {
     //The Callback to post events to
     private Callback callback;
 
+    //Runnable that recursively adds characters to the edittext and performs callbacks
     private Runnable characterAdder = new Runnable() {
         @Override
         public void run() {
+            //Set the text to our subsequence
             editText.setText(text.subSequence(0, textIndex));
             editText.setSelection(textIndex);
+
+            //If the index is in our bounds then output current char
+            if(callback != null && text.length() > 0 && textIndex < text.length()) {
+                callback.onCharacterTyped(text.charAt(textIndex));
+            }
+
+            //this gets tricky.  we need to send one more pass through to update the final character
             textIndex++;
             if(textIndex <= text.length()) {
                 handler.postDelayed(characterAdder, delay);
-                if(callback != null)
-                    callback.onCharacterTyped(text.charAt(textIndex));
             }
             else {
                 finished = true;
-                if(callback != null)
+                if(callback != null) {
                     callback.onAnimationEnd();
+                }
             }
         }
     };
