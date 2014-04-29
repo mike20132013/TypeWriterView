@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 
                 @Override
                 public void onCharacterTyped(char character) {
-                    Log.d("TypeWriterView", "onCharacterTyped: " + character + " " + writer.getEditText().getText());
+                    Log.d("TypeWriterView", "onCharacterTyped: " + character);
                 }
             });
             animate.setOnClickListener(new View.OnClickListener() {

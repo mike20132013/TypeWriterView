@@ -8,6 +8,7 @@ import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
@@ -26,10 +27,7 @@ import android.widget.FrameLayout;
  See the License for the specific language governing permissions and
  limitations under the License.
  */
-public class TypeWriterView extends FrameLayout {
-
-    //The underlying EditText
-    private EditText editText;
+public class TypeWriterView extends EditText {
 
     //The text to be animated
     private CharSequence text;
@@ -54,8 +52,8 @@ public class TypeWriterView extends FrameLayout {
         @Override
         public void run() {
             //Set the text to our subsequence
-            editText.setText(text.subSequence(0, textIndex));
-            editText.setSelection(textIndex);
+            setText(text.subSequence(0, textIndex));
+            setSelection(textIndex);
 
             //If the index is in our bounds then output current char
             if(callback != null && text.length() > 0 && textIndex < text.length()) {
@@ -93,20 +91,26 @@ public class TypeWriterView extends FrameLayout {
     }
 
     private void init(Context context) {
-        editText = new EditText(context);
-        addView(editText);
+
+        //Override the default touch listener
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
 
         //Remove text suggestions for completion and spelling
-        editText.setRawInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        setRawInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
         //Enable cursor
-        editText.setCursorVisible(true);
+        setCursorVisible(true);
 
         //Remove the blue underline in >= ICS
         if(Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            editText.setBackgroundDrawable(null);
+            setBackgroundDrawable(null);
         } else {
-            editText.setBackground(null);
+            setBackground(null);
         }
     }
 
@@ -118,19 +122,14 @@ public class TypeWriterView extends FrameLayout {
         this.text = text;
         textIndex = 0;
         finished = false;
-        editText.getText().clear();
+        getText().clear();
+
+        //Request focus start blinking again
+        requestFocus();
 
         //Remove any existing Runnable and add our new one
         handler.removeCallbacks(characterAdder);
         handler.postDelayed(characterAdder, delay);
-    }
-
-    /**
-     * Use this sparingly to make specific tweaks you need.  Wrapper methods will be provided for common tasks.
-     * @return
-     */
-    public EditText getEditText() {
-        return editText;
     }
 
     /**
@@ -142,32 +141,11 @@ public class TypeWriterView extends FrameLayout {
     }
 
     /**
-     * Must also be sure to set the textCursorDrawable via your style or XML.
-     * @param color
-     */
-    public void setTextColor(ColorStateList color) {
-        editText.setTextColor(color);
-    }
-
-    /**
-     * Must also be sure to set the textCursorDrawable via your style or XML.
-     * @param color
-     */
-    public void setTextColor(int color) {
-        editText.setTextColor(color);
-    }
-
-    /**
      * Sets the delay between characters being typed.
      * @param millis
      */
     public void setCharacterDelay(long millis) {
         delay = millis;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return true;
     }
 
     /**
